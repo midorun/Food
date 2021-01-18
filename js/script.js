@@ -40,105 +40,6 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-
-    /** Timer */
-    const deadline = '2020-12-24';
-
-
-    function getTimeRemaining(endtime){
-        const t = Date.parse(endtime) - Date.parse(new Date()),
-              days = Math.floor(t / (1000 * 60 * 60 * 24)),
-              hours = Math.floor((t / (1000 * 60 * 60)) % 24),
-              minutes = Math.floor((t / (1000 * 60)) % 60),
-              seconds = Math.floor((t / 1000) % 60);
-        
-        return{
-            'total': t,
-            'days': days,
-            'hours': hours,
-            'minutes': minutes,
-            'seconds': seconds
-        };
-    }
-
-    function getZero(num){
-        if(num >= 0 && num < 10){
-            return `0${num}`;
-        }else{
-           return num;
-        }
-    }
-
-    function changePromoTimer(selector, endtime){
-        const timer = document.querySelector(selector),
-              days = timer.querySelector('#days'),
-              hours = timer.querySelector('#hours'),
-              minutes = timer.querySelector('#minutes'),
-              seconds = timer.querySelector('#seconds'),
-              timeInterval = setInterval(updateTimer, 1000);
-
-        updateTimer();
-
-        function updateTimer(){
-            const t = getTimeRemaining(endtime);
-
-            days.textContent = getZero(t.days);
-            hours.textContent = getZero(t.hours);
-            minutes.textContent = getZero(t.minutes);
-            seconds.textContent = getZero(t.seconds);
-
-            if(t.total <= 0){
-                clearInterval(timeInterval);
-            }
-        }
-    }
-
-    changePromoTimer('.timer', deadline);
-
-    // Modal
-    const modalTrigger = document.querySelectorAll('[data-modal]'),
-          modal = document.querySelector('.modal'),
-          modalTimer = setInterval(openModal, 60000);
-
-    function closeModal(){
-        modal.classList.remove('show');
-        modal.classList.add('hide');
-        document.body.style.overflow = '';
-    }
-    
-    function openModal(){
-        modal.classList.remove('hide');
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-        clearInterval(modalTimer);
-        
-    }
-
-    modalTrigger.forEach((item) => {
-        item.addEventListener('click', openModal);
-    });
-
-    modal.addEventListener('click', (event) => {
-        if(event.target === modal || event.target.getAttribute('data-close') == ''){
-           closeModal();
-        }
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if(event.key == 'Escape'){
-            closeModal();
-        }
-    });
- 
-    function showModalByScroll(){
-        if(window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight){
-            openModal();
-            window.removeEventListener('scroll', showModalByScroll);
-        }
-    }    
-    window.addEventListener('scroll', showModalByScroll);
-
-
         // POST request
     const forms = document.querySelectorAll('form');
 
@@ -217,5 +118,9 @@ window.addEventListener('DOMContentLoaded', () => {
             }, 10000);
         }
     }
+
+    fetch('db.json')
+        .then(data => data.json())
+        .then(res => console.log(res));
 });
 
