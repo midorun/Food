@@ -1,9 +1,9 @@
 'use strict';
 
 window.addEventListener('DOMContentLoaded', () => {
-    class MenuCard{
+    class MenuCard {
 
-        constructor(img, alt, title, description, price, parentSelector, ...classes){
+        constructor(img, alt, title, description, price, parentSelector, ...classes) {
             this.img = img;
             this.alt = alt;
             this.title = title;
@@ -11,16 +11,19 @@ window.addEventListener('DOMContentLoaded', () => {
             this.price = price;
             this.parentSelector = document.querySelector(parentSelector);
             this.classes = classes;
-            this.render();
         }
-    
-        convertCurrency(){
-            
+
+        convertCurrency() {
+
         }
-    
-        render(){
+
+        render() {
             let card = document.createElement('div');
-            this.classes.forEach(item => card.classList.add(item));
+            if (this.classes.length) {
+                this.classes.forEach(item => card.classList.add(item));
+            } else {
+                card.classList.add('menu__item');
+            }
             card.innerHTML = `
                 <img src="${this.img}" alt="${this.alt}">
                 <h3 class="menu__item-subtitle">Меню "${this.title}"</h3>
@@ -31,37 +34,72 @@ window.addEventListener('DOMContentLoaded', () => {
                     <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
                 </div>
             `;
-            
+
             this.parentSelector.append(card);
         }
     }
-    
-    const cardOne = new MenuCard('img/tabs/vegy.jpg', 
-                                'vegy',
-                                'Фитнес',
-                                'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-                                229,
-                                '.menu .container',
-                                'menu__item')
-                                ;
-    
-    const cardTwo = new MenuCard('img/tabs/elite.jpg', 
-                                'premium',
-                                'Премиум',
-                                'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-                                550,
-                                '.menu .container',
-                                'menu__item');
-    
-    const cardThree = new MenuCard('img/tabs/post.jpg', 
-                                'post',
-                                'Постное',
-                                'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-                                430,
-                                '.menu .container',
-                                'menu__item');
-    
-    
-    
-    
+
+    const getResource = async (url) => {
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            throw new Error(`Could not fect ${url}, status: ${res.status}`);
+        }
+
+        return await res.json();
+    };
+
+    // getResource('http://localhost:3000/menu')
+    //     .then(data => {
+    //         data.forEach(({
+    //             img,
+    //             altimg,
+    //             title,
+    //             descr,
+    //             price
+    //         }) => {
+    //             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+    //         });
+    //     });
+
+    // getResource('http://localhost:3000/menu')
+    //     .then(data => render(data));
+
+    axios.get('http://localhost:3000/menu')
+        .then(data => {
+            data.data.forEach(({
+                img,
+                altimg,
+                title,
+                descr,
+                price
+            }) => {
+                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
+    function render(data) {
+        data.forEach(({
+            img,
+            altimg,
+            title,
+            descr,
+            price
+        }) => {
+            let card = document.createElement('div');
+            card.classList.add('menu__item');
+            card.innerHTML = `
+                <img src="${img}" alt="${altimg}">
+                <h3 class="menu__item-subtitle">Меню "${title}"</h3>
+                <div class="menu__item-descr">${descr}</div>
+                <div class="menu__item-divider"></div>
+                <div class="menu__item-price">
+                    <div class="menu__item-cost">Цена:</div>
+                    <div class="menu__item-total"><span>${price}</span> грн/день</div>
+                </div>
+            `;
+
+            document.querySelector('.menu .container').append(card);
+        });
+    }
 });

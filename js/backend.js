@@ -1,14 +1,60 @@
-'use strict';
-
 window.addEventListener('DOMContentLoaded', () => {
 
-    /** Tabs */
+/**
+ * Modal
+ */
+
+    const modalTrigger = document.querySelectorAll('[data-modal]'),
+    modal = document.querySelector('.modal'),
+    modalTimer = setInterval(openModal, 60000);
+
+    function closeModal(){
+        modal.classList.remove('show');
+        modal.classList.add('hide');
+        document.body.style.overflow = '';
+    }
+
+    function openModal(){
+        modal.classList.remove('hide');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimer);
+    }
+
+    modalTrigger.forEach((item) => {
+        item.addEventListener('click', openModal);
+    });
+
+    modal.addEventListener('click', (event) => {
+        if(event.target === modal || event.target.getAttribute('data-close') == ''){
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if(event.key == 'Escape'){
+            closeModal();
+        }
+    });
+
+    function showModalByScroll(){
+        if(window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight){
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll);
+        }
+    }    
+    window.addEventListener('scroll', showModalByScroll);
+
+    /**
+     * Tabs
+     */
+
     const tabs = document.querySelectorAll('.tabheader__item'),
-          tabsContent = document.querySelectorAll('.tabcontent'),
-          tabsParent = document.querySelector('.tabheader__items');
-         
-         
-    function hideTabContent(){
+        tabsContent = document.querySelectorAll('.tabcontent'),
+        tabsParent = document.querySelector('.tabheader__items');
+
+
+    function hideTabContent() {
         tabsContent.forEach((item) => {
             item.classList.add('hide');
             item.classList.remove('show', 'fade');
@@ -17,9 +63,9 @@ window.addEventListener('DOMContentLoaded', () => {
         tabs.forEach(item => {
             item.classList.remove('tabheader__item_active');
         });
-    }  
+    }
 
-    function showTabContent(i = 0){
+    function showTabContent(i = 0) {
         tabsContent[i].classList.add('show', 'fade');
         tabsContent[i].classList.remove('hide');
         tabs[i].classList.add('tabheader__item_active');
@@ -28,19 +74,23 @@ window.addEventListener('DOMContentLoaded', () => {
     hideTabContent();
     showTabContent(0);
 
-    tabsParent.addEventListener('click', (event) =>{
+    tabsParent.addEventListener('click', (event) => {
         const target = event.target;
 
-        if(target && target.classList.contains('tabheader__item')){
+        if (target && target.classList.contains('tabheader__item')) {
             tabs.forEach((item, i) => {
-                if(target == item){
+                if (target == item) {
                     hideTabContent();
                     showTabContent(i);
                 }
             });
         }
     });
-        // POST request
+
+/**
+ * Backend
+ */
+
     const forms = document.querySelectorAll('form');
 
     const message = {
@@ -49,9 +99,21 @@ window.addEventListener('DOMContentLoaded', () => {
         failure: 'failure'
     };
 
-    forms.forEach(item => postData(item));
+    forms.forEach(item => bindPostData(item));
 
-    function postData(form) {
+    const postData = async (url, data) => {
+        const res = await fetch(url, {
+            method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+            body: data
+        }); 
+
+        return await res.json();
+    };
+
+    function bindPostData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -64,20 +126,16 @@ window.addEventListener('DOMContentLoaded', () => {
             form.insertAdjacentElement('afterend', statusMsg);
 
             const formData = new FormData(form);
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
+
 
             const object = {};
-            formData.forEach(function(value, key){
-                object[key]=value;
+            formData.forEach(function (value, key) {
+                object[key] = value;
             });
 
-            fetch('server.php', {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'
-                },
-                body: JSON.stringify(object)
-            })
-            .then(data => data.text())
+         
+            postData('http://localhost:3000/requests', json)
             .then(data => {
                 console.log(data);
                 showThanksModal(message.success);
@@ -90,10 +148,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 form.reset();
             });
 
-           
+
         });
 
-        function showThanksModal(message){
+        function showThanksModal(message) {
             const prevModalDialog = document.querySelector('.modal__dialog');
 
             prevModalDialog.classList.add('hide');
@@ -109,7 +167,7 @@ window.addEventListener('DOMContentLoaded', () => {
             `;
 
             document.querySelector('.modal').append(thanksModalDiv);
-            
+
             setTimeout(() => {
                 thanksModalDiv.remove();
                 prevModalDialog.classList.add('show');
@@ -118,9 +176,4 @@ window.addEventListener('DOMContentLoaded', () => {
             }, 10000);
         }
     }
-
-    fetch('db.json')
-        .then(data => data.json())
-        .then(res => console.log(res));
 });
-
