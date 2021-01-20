@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('hide');
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
-        clearInterval(modalTimer);
+        // clearInterval(modalTimer);
     }
 
     modalTrigger.forEach((item) => {
@@ -129,32 +129,6 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const getResource = async (url) => {
-        const res = await fetch(url);
-
-        if (!res.ok) {
-            throw new Error(`Could not fect ${url}, status: ${res.status}`);
-        }
-
-        return await res.json();
-    };
-
-    // getResource('http://localhost:3000/menu')
-    //     .then(data => {
-    //         data.forEach(({
-    //             img,
-    //             altimg,
-    //             title,
-    //             descr,
-    //             price
-    //         }) => {
-    //             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-    //         });
-    //     });
-
-    // getResource('http://localhost:3000/menu')
-    //     .then(data => render(data));
-
     axios.get('http://localhost:3000/menu')
         .then(data => {
             data.data.forEach(({
@@ -167,6 +141,33 @@ window.addEventListener('DOMContentLoaded', () => {
                 new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
             });
         });
+
+    /** Alternative rendering of menu    
+    const getResource = async (url) => {
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            throw new Error(`Could not fect ${url}, status: ${res.status}`);
+        }
+
+        return await res.json();
+    };
+
+    getResource('http://localhost:3000/menu')
+        .then(data => {
+            data.forEach(({
+                img,
+                altimg,
+                title,
+                descr,
+                price
+            }) => {
+                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
+    getResource('http://localhost:3000/menu')
+        .then(data => render(data));
 
     function render(data) {
         data.forEach(({
@@ -192,6 +193,7 @@ window.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.menu .container').append(card);
         });
     }
+    */
 
     /**
      * PromoTimer
@@ -341,17 +343,14 @@ window.addEventListener('DOMContentLoaded', () => {
     /**
      * Slider
      */
-    let index = 1,
-        offset = 0;
+
     const total = document.querySelector('#total'),
         current = document.querySelector('#current'),
         prev = document.querySelector('.offer__slider-prev'),
         next = document.querySelector('.offer__slider-next'),
-        slides = document.querySelectorAll('.offer__slide'),
-        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
-        slidesInner = document.querySelector('.offer__slider-inner'),
-        slideWidth = window.getComputedStyle(slidesWrapper).width;
+        slides = document.querySelectorAll('.offer__slide');
 
+    let index = 1;
     /** 1 Вариант
      * showSlide(index);
 
@@ -386,6 +385,12 @@ window.addEventListener('DOMContentLoaded', () => {
     */
 
     /** 2 Вариант */
+    const slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+        slidesInner = document.querySelector('.offer__slider-inner'),
+        slideWidth = window.getComputedStyle(slidesWrapper).width;
+
+    let offset = 0;
+
     slidesInner.style.cssText = `
         width: ${100 * slides.length}%;
         display: flex;
@@ -402,10 +407,11 @@ window.addEventListener('DOMContentLoaded', () => {
         if (offset == +slideWidth.slice(0, slideWidth.length - 2) * (slides.length - 1)) {
             offset = 0;
         } else {
-            offset += +slideWidth.slice(0, slideWidth.length - 2)
+            offset += +slideWidth.slice(0, slideWidth.length - 2);
         }
         slidesInner.style.transform = `translateX(-${offset}px)`;
         changeCounter(1);
+        highlightDot(index);
     });
 
     prev.addEventListener('click', () => {
@@ -416,12 +422,12 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         slidesInner.style.transform = `translateX(-${offset}px)`;
         changeCounter(-1);
+        highlightDot(index);
     });
 
     total.textContent = getZero(+total.textContent);
 
     function changeCounter(n = 0) {
-        console.log('call');
         index += n;
         if (index > slides.length) {
             index = 1;
@@ -434,4 +440,59 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     changeCounter();
+
+    /** SLider's navigation */
+
+    const offerSlider = document.querySelector('.offer__slider');
+    offerSlider.style.position = 'relative';
+
+    let carouselIndicators = document.createElement('ol');
+    carouselIndicators.classList.add('carousel-indicators');
+
+    offerSlider.append(carouselIndicators);
+
+    slides.forEach(slide => {
+        let dot = document.createElement('li');
+        dot.classList.add('dot');
+        carouselIndicators.append(dot);
+    });
+
+    let dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, i) => {
+        dot.setAttribute('index', i + 1);
+    });
+
+    function highlightDot(index = 1) {
+        dots.forEach(dot => dot.classList.remove('dot-active'));
+        dots[index - 1].classList.add('dot-active');
+    }
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            dots.forEach(dot => dot.classList.remove('dot-active'));
+            if (e.target && e.target.classList.contains('dot')) {
+                e.target.classList.add('dot-active');
+
+                index = e.target.getAttribute('index');
+                current.textContent = getZero(index);
+
+                // console.log(typeof (+index));
+                offset = +slideWidth.slice(0, slideWidth.length - 2) * (+index - 1);
+                console.log(offset);
+                slidesInner.style.transform = `translateX(-${offset}px)`;
+            }
+        });
+    });
+
+    highlightDot();
+
+    /** Personal customisation */
+
+    // Отключение выделения счетчика и стрелок у слайдера
+    const offerSliderCounter = document.querySelector('.offer__slider-counter');
+
+    offerSliderCounter.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+    });
+
 });
