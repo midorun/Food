@@ -368,10 +368,10 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     offerSliderNext.addEventListener('click', () => {
-        if (offset == +slideWidth.slice(0, slideWidth.length - 2) * (offerSlides.length - 1)) {
+        if (offset == valueToNumber(slideWidth) * (offerSlides.length - 1)) {
             offset = 0;
         } else {
-            offset += +slideWidth.slice(0, slideWidth.length - 2);
+            offset += valueToNumber(slideWidth);
         }
         changeInnerOffset();
         changeCounter(1);
@@ -380,9 +380,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     offerSliderPrev.addEventListener('click', () => {
         if (offset == 0) {
-            offset = +slideWidth.slice(0, slideWidth.length - 2) * (offerSlides.length - 1);
+            offset = valueToNumber(slideWidth) * (offerSlides.length - 1);
         } else {
-            offset -= +slideWidth.slice(0, slideWidth.length - 2);
+            offset -= valueToNumber(slideWidth);
         }
         changeInnerOffset();
         changeCounter(-1);
@@ -413,11 +413,17 @@ window.addEventListener('DOMContentLoaded', () => {
                 index = e.target.getAttribute('index');
                 current.textContent = getZero(index);
 
-                offset = +slideWidth.slice(0, slideWidth.length - 2) * (+index - 1);
+                offset = valueToNumber(slideWidth) * (+index - 1);
                 changeInnerOffset();
             }
         });
     });
+
+    highlightDot();
+
+    function valueToNumber(value) {
+        return +value.replace(/\D/g, '');
+    }
 
     function changeInnerOffset() {
         offerSliderInner.style.transform = `translateX(-${offset}px)`;
@@ -439,9 +445,6 @@ window.addEventListener('DOMContentLoaded', () => {
         dots.forEach(dot => dot.classList.remove('dot-active'));
         dots[index - 1].classList.add('dot-active');
     }
-
-    highlightDot();
-
 
     /** 1 Вариант
      * showSlide(index);
@@ -483,7 +486,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const offerSliderCounter = document.querySelector('.offer__slider-counter');
 
     offerSliderCounter.addEventListener('mousedown', (e) => {
-        e.offerSliderPreventDefault();
+        e.preventDefault();
     });
 
 });
