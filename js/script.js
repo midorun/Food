@@ -492,6 +492,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     } else {
         sex = 'female';
+        document.querySelector(`#${sex}`).classList.add('calculating__choose-item_active');
     }
 
     if (localStorage.getItem(ratio)) {
