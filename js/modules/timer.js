@@ -51,4 +51,4 @@ function timer() {
     changePromoTimer('.timer', deadline);
 }
 
-module.exports = timer;
+export default timer;
