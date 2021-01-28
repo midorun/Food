@@ -1,5 +1,6 @@
-function timer() {
-    const deadline = '2021-3-24';
+import { getZero } from '../services/services';
+
+function timer(timerSelector, deadline) {
 
     function getTimeRemaining(endtime) {
         const t = Date.parse(endtime) - Date.parse(new Date()),
@@ -15,14 +16,6 @@ function timer() {
             'minutes': minutes,
             'seconds': seconds
         };
-    }
-
-    function getZero(num) {
-        if (num >= 0 && num < 10) {
-            return `0${num}`;
-        } else {
-            return num;
-        }
     }
 
     function changePromoTimer(selector, endtime) {
@@ -48,7 +41,7 @@ function timer() {
             }
         }
     }
-    changePromoTimer('.timer', deadline);
+    changePromoTimer(timerSelector, deadline);
 }
 
 export default timer;

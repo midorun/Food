@@ -1,5 +1,8 @@
-function forms() {
-    const forms = document.querySelectorAll('form');
+import { openModal, closeModal } from './modal';
+import { postData } from '../services/services';
+
+function forms(formsSelector, modalTimerId) {
+    const forms = document.querySelectorAll(formsSelector);
 
     const message = {
         loading: 'img/form/spinner.svg',
@@ -9,21 +12,9 @@ function forms() {
 
     forms.forEach(item => bindPostData(item));
 
-    const postData = async (url, data) => {
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: data
-        });
-
-        return await res.json();
-    };
-
     function bindPostData(form) {
         form.addEventListener('submit', (e) => {
-            e.offerSliderPreventDefault();
+            e.preventDefault();
 
             const statusMsg = document.createElement('img');
             statusMsg.src = message.loading;
@@ -44,7 +35,6 @@ function forms() {
 
             postData('http://localhost:3000/requests', json)
                 .then(data => {
-                    console.log(data);
                     showThanksModal(message.success);
                     statusMsg.remove();
                 })
@@ -60,7 +50,7 @@ function forms() {
             const offerSliderPrevModalDialog = document.querySelector('.modal__dialog');
 
             offerSliderPrevModalDialog.classList.add('hide');
-            openModal();
+            openModal('.modal', modalTimerId);
 
             const thanksModalDiv = document.createElement('div');
             thanksModalDiv.classList.add('modal__dialog');
@@ -77,7 +67,7 @@ function forms() {
                 thanksModalDiv.remove();
                 offerSliderPrevModalDialog.classList.add('show');
                 offerSliderPrevModalDialog.classList.remove('hide');
-                closeModal();
+                closeModal('.modal');
             }, 10000);
         }
     }
