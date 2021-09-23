@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('build') {
             steps{
-                git branch: 'main', url: 'https://github.com/midorun/react-api-console.git'
+                git branch: 'master', url: 'https://github.com/midorun/Food.git'
                 bat 'npm install'
                 bat 'webpack --watch'
             }
